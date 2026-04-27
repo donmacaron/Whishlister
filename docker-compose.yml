@@ -23,5 +23,5 @@ services:
       - traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true
       - traefik.http.middlewares.redirect-to-https.redirectscheme.port=443
 networks:
-  traefik_net:
+  traefik_default:
     external: true
