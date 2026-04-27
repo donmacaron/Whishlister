@@ -9,7 +9,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - FLASK_ENV=production
     networks:
-      - traefik_net
+      - traefik_default
     labels:
       - traefik.enable=true
       - traefik.http.routers.wishlister1.rule=Host(`wishlist.donmacaron.net`)
