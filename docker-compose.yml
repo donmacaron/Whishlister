@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  wishlister:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - ./instance:/app/instance
+      - ./app/static/uploads:/app/app/static/uploads
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - FLASK_ENV=production
+    networks:
+      - traefik_net
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.wishlister1.rule=Host(`wishlist.donmacaron.net`)
+      - traefik.http.routers.wishlister1.entrypoints=webs
+      - traefik.http.routers.wishlister1.tls.certresolver=myresolver
+      - traefik.http.routers.wishlister2.rule=Host(`wishlist.donmacaron.net`)
+      - traefik.http.routers.wishlister2.entrypoints=web
+      - traefik.http.routers.wishlister2.middlewares=redirect-to-https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.port=443
+networks:
+  traefik_net:
+    external: true

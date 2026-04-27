@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Wishlister{% endblock %}
+{% block content %}
+<h1 class="page-title">All Wishlists</h1>
+{% if users %}
+<div class="user-grid">
+    {% for user in users %}
+    <a class="user-card" href="{{ url_for('main.profile', username=user.username) }}">
+        {% if user.profile_pic %}
+            <img class="user-card-pic" src="{{ url_for('static', filename=user.profile_pic) }}" alt="{{ user.username }}">
+        {% else %}
+            <div class="user-card-pic user-card-initial">{{ user.username[0].upper() }}</div>
+        {% endif %}
+        <div class="user-card-name">{{ user.username }}</div>
+        <div class="user-card-count">{{ user.wish_items|length }} wish{% if user.wish_items|length != 1 %}es{% endif %}</div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty-state">No users yet. <a href="{{ url_for('auth.signup') }}">Be the first to sign up!</a></p>
+{% endif %}
+{% endblock %}

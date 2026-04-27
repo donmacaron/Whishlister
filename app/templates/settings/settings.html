@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Settings &mdash; Wishlister{% endblock %}
+{% block content %}
+<h1>Settings</h1>
+<div class="settings-grid">
+
+    <section class="settings-card">
+        <h2>Profile</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="update_profile">
+            <label>Profile Picture</label>
+            {% if current_user.profile_pic %}
+                <img class="current-pic-preview" src="{{ url_for('static', filename=current_user.profile_pic) }}" height="80" alt="profile">
+            {% endif %}
+            <input type="file" name="profile_pic" accept="image/*">
+            <label for="bio">Bio</label>
+            <textarea id="bio" name="bio" rows="3" placeholder="Tell something about yourself...">{{ current_user.bio or '' }}</textarea>
+            <fieldset class="birthday-fieldset">
+                <legend>Birthday</legend>
+                <div class="birthday-row">
+                    <div class="birthday-field">
+                        <label for="birth_day">Day</label>
+                        <input id="birth_day" type="number" name="birth_day" min="1" max="31"
+                               value="{{ current_user.birth_day or '' }}" placeholder="DD">
+                    </div>
+                    <div class="birthday-field">
+                        <label for="birth_month">Month</label>
+                        <select id="birth_month" name="birth_month">
+                            <option value="">Month</option>
+                            {% for m in range(1, 13) %}
+                            <option value="{{ m }}" {% if current_user.birth_month == m %}selected{% endif %}>
+                                {{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="birthday-field">
+                        <label for="birth_year">Year <small>(shows age)</small></label>
+                        <input id="birth_year" type="number" name="birth_year" min="1900" max="2025"
+                               value="{{ current_user.birth_year or '' }}" placeholder="YYYY">
+                    </div>
+                </div>
+            </fieldset>
+            <button type="submit" class="btn btn-primary">Save Profile</button>
+        </form>
+    </section>
+
+    <section class="settings-card">
+        <h2>Request Password Change</h2>
+        <p class="hint">Your new password needs a super user's approval before it takes effect.</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="request_password_change">
+            <label for="new_password">New Password <small>(min 8 chars)</small></label>
+            <input id="new_password" type="password" name="new_password" minlength="8" required>
+            <label for="confirm_password">Confirm</label>
+            <input id="confirm_password" type="password" name="confirm_password" required>
+            <button type="submit" class="btn">Submit Request</button>
+        </form>
+    </section>
+
+</div>
+{% endblock %}

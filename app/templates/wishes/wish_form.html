@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Wish &mdash; Wishlister{% endblock %}
+{% block content %}
+<div class="form-card">
+    <h1>{{ action }} Wish</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label for="name">Name <span class="required">*</span></label>
+        <input id="name" type="text" name="name" value="{{ item.name if item else '' }}" required>
+        <label for="link">Link <small>(optional URL)</small></label>
+        <input id="link" type="url" name="link" value="{{ item.link if item else '' }}" placeholder="https://...">
+        <label for="description">Description <small>(optional)</small></label>
+        <textarea id="description" name="description" rows="3">{{ item.description if item else '' }}</textarea>
+        <label for="picture">Picture <small>(optional, max 5 MB)</small></label>
+        <input id="picture" type="file" name="picture" accept="image/*">
+        {% if item and item.picture %}
+        <div class="current-pic-preview">
+            <small>Current:</small>
+            <img src="{{ url_for('static', filename=item.picture) }}" height="60" alt="current">
+        </div>
+        {% endif %}
+        <div class="form-row-buttons">
+            <button type="submit" class="btn btn-primary">{{ action }} Wish</button>
+            <a class="btn" href="{{ url_for('main.profile', username=current_user.username) }}">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

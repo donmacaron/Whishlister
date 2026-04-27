@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }}'s Wishlist &mdash; Wishlister{% endblock %}
+{% block content %}
+<div class="profile-header">
+    <img class="profile-pic" src="{{ url_for('static', filename=avatar) }}" alt="{{ user.username }}">
+    <div class="profile-info">
+        <h1>{{ user.username }}
+            {% if user.is_superuser %}<span class="badge badge-super">&#11088; Super User</span>{% endif %}
+        </h1>
+        {% if user.bio %}<p class="profile-bio">{{ user.bio }}</p>{% endif %}
+        {% if user.birthday_display %}
+        <p class="profile-birthday">
+            &#127874; {{ user.birthday_display }}
+            {% if user.age is not none %}<span class="profile-age">(age {{ user.age }})</span>{% endif %}
+        </p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="wishes-section">
+    <div class="wishes-header">
+        <h2>Wish List</h2>
+        {% if current_user.is_authenticated and (current_user.id == user.id or current_user.is_superuser) %}
+            <a class="btn btn-primary" href="{{ url_for('wishes.add') }}">+ Add Wish</a>
+        {% endif %}
+    </div>
+    {% if user.wish_items %}
+    <div class="wish-grid">
+        {% for item in user.wish_items %}
+        <div class="wish-card">
+            {% if item.picture %}
+                <img class="wish-pic" src="{{ url_for('static', filename=item.picture) }}" alt="{{ item.name }}">
+            {% else %}
+                <img class="wish-pic" src="{{ url_for('static', filename='placeholder/wish_placeholder.svg') }}" alt="No image">
+            {% endif %}
+            <div class="wish-body">
+                <h3 class="wish-name">
+                    {% if item.link %}
+                        <a href="{{ item.link }}" target="_blank" rel="noopener">{{ item.name }}</a>
+                    {% else %}{{ item.name }}{% endif %}
+                </h3>
+                {% if item.description %}<p class="wish-desc">{{ item.description }}</p>{% endif %}
+                {% if current_user.is_authenticated and (current_user.id == user.id or current_user.is_superuser) %}
+                <div class="wish-actions">
+                    <a class="btn btn-sm" href="{{ url_for('wishes.edit', item_id=item.id) }}">Edit</a>
+                    <form method="POST" action="{{ url_for('wishes.delete', item_id=item.id) }}" style="display:inline"
+                          onsubmit="return confirm('Delete this wish?')">
+                        <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">No wishes yet.
+        {% if current_user.is_authenticated and current_user.id == user.id %}
+            <a href="{{ url_for('wishes.add') }}">Add your first wish!</a>
+        {% endif %}
+    </p>
+    {% endif %}
+</div>
+{% endblock %}
