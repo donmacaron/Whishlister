@@ -1,0 +1,192 @@
+/* =============================================================
+   WISHLISTER — Reservation Overlay & Animated Eyes
+   Pixel art style, smooth motion, constantly looping.
+   Animation: look left → center → right → center → red stare → blink
+   ============================================================= */
+
+/* ── Wish card picture wrapper ───────────────────────────── */
+.wish-pic-wrap {
+  position: relative;
+  overflow: hidden;
+  line-height: 0; /* kills phantom gap under img */
+}
+
+/* ── Dark overlay ───────────────────────────────────────── */
+.reserved-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 5;
+  animation: overlay-pulse 5s linear infinite;
+}
+
+@keyframes overlay-pulse {
+  0%,   66% { background: rgba(0, 0, 0, 0.70); }
+  68%        { background: rgba(28, 0, 0, 0.82); } /* subtle red tint when staring */
+  83%        { background: rgba(28, 0, 0, 0.82); }
+  84%        { background: rgba(0, 0, 0, 0.70); }
+  100%       { background: rgba(0, 0, 0, 0.70); }
+}
+
+/* ── RESERVED label ─────────────────────────────────────── */
+.reserved-label {
+  font-family: 'VT323', 'Courier New', monospace;
+  font-size: 1rem;
+  color: #cc0000;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  animation: label-pulse 5s linear infinite;
+}
+.reserved-label::before { content: '[ '; }
+.reserved-label::after  { content: ' ]'; }
+
+@keyframes label-pulse {
+  0%,   66% { color: #cc0000; }
+  68%        { color: #ff2222; text-shadow: 0 0 6px rgba(255,34,34,0.6); }
+  83%        { color: #ff2222; text-shadow: 0 0 6px rgba(255,34,34,0.6); }
+  84%        { color: #cc0000; text-shadow: none; }
+  100%       { color: #cc0000; }
+}
+
+/* ── Eyes container ──────────────────────────────────────── */
+.eyes-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  image-rendering: pixelated;
+}
+
+/* ── Individual pixel-art eye ────────────────────────────── */
+.eye {
+  width: 40px;
+  height: 24px;
+  background: #f0f0f0;
+  position: relative;
+  overflow: hidden;
+  image-rendering: pixelated;
+  /* Hard pixel border: black 2px outline */
+  box-shadow:
+    0 0 0 2px #000,
+    0 0 0 3px #1a1a1a;
+}
+
+/* ── Pupil ────────────────────────────────────────────── */
+.eye .pupil {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  top: 5px;          /* vertically centred in 24px eye */
+  left: 4px;         /* starts hard-left */
+  image-rendering: pixelated;
+
+  /* Two simultaneous animations: horizontal movement + colour change */
+  animation:
+    pupil-move  5s linear infinite,
+    pupil-color 5s linear infinite;
+}
+
+/* ── Eyelid (blink) ─────────────────────────────────────── */
+.eye .eyelid {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 0;
+  background: #0d0d0d; /* same colour as CRT background — looks like eye shuts */
+  z-index: 2;
+  image-rendering: pixelated;
+  animation: eyelid-blink 5s linear infinite;
+}
+
+/* ---------------------------------------------------------------
+   KEYFRAMES
+   5-second cycle:
+     0  – 12%   hard left
+     13 – 19%   smooth move to center
+     20 – 37%   center
+     38 – 43%   smooth move to right
+     44 – 57%   hard right
+     58 – 63%   smooth move to center
+     64 – 67%   center pause
+     68 – 83%   RED STARE (pupils turn red, overlay darkens)
+     74 – 79%   BLINK (eyelid drops)
+     84 – 91%   smooth move back to left
+     92 –100%   hard left (loop)
+   --------------------------------------------------------------- */
+
+@keyframes pupil-move {
+  /* Hard left */
+  0%    { left: 4px; }
+  12%   { left: 4px; }
+  /* Glide to center */
+  20%   { left: 13px; }
+  37%   { left: 13px; }
+  /* Glide to right */
+  44%   { left: 22px; }
+  57%   { left: 22px; }
+  /* Glide back to center */
+  64%   { left: 13px; }
+  /* Hold center through stare + blink */
+  84%   { left: 13px; }
+  /* Glide back to left */
+  92%   { left: 4px; }
+  100%  { left: 4px; }
+}
+
+@keyframes pupil-color {
+  /* Normal: black pupil */
+  0%,  67% { background: #000000; }
+  /* Stare: red pupils glow */
+  68%       { background: #cc0000; }
+  83%       { background: #cc0000; }
+  /* Back to black */
+  84%       { background: #000000; }
+  100%      { background: #000000; }
+}
+
+@keyframes eyelid-blink {
+  /* Eye open */
+  0%,   73% { height: 0; }
+  /* Snap shut (mid-stare for extra creep factor) */
+  74%        { height: 24px; }
+  79%        { height: 24px; }
+  /* Snap open */
+  80%        { height: 0; }
+  100%       { height: 0; }
+}
+
+/* =============================================================
+   RESERVE / TAKEN / CANCEL button styles
+   ============================================================= */
+
+.btn-taken {
+  border-color: #333 !important;
+  color: #555 !important;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* =============================================================
+   MY RESERVATIONS section
+   ============================================================= */
+
+.my-reservations {
+  margin-top: 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 2px solid #cc0000;
+}
+
+.my-reservations .wish-desc {
+  margin-bottom: 0.25rem;
+}
+
+.reservation-from {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0;
+}
+.reservation-from::before { content: 'FROM: '; color: #cc0000; }
+.reservation-from a { color: #f0f0f0; }
+.reservation-from a:hover { color: #cc0000; }

@@ -1,64 +1,194 @@
 {% extends "base.html" %}
-{% block title %}{{ user.username }}'s Wishlist &mdash; Wishlister{% endblock %}
+{% block title %}{{ user.username }}'S WISHLIST &mdash; WISHLISTER{% endblock %}
 {% block content %}
+
+{# ---- Profile header ---- #}
 <div class="profile-header">
-    <img class="profile-pic" src="{{ url_for('static', filename=avatar) }}" alt="{{ user.username }}">
+    <img class="profile-pic"
+         src="{{ url_for('static', filename=avatar) }}"
+         alt="{{ user.username }}">
     <div class="profile-info">
         <h1>{{ user.username }}
-            {% if user.is_superuser %}<span class="badge badge-super">&#11088; Super User</span>{% endif %}
+            {% if user.is_superuser %}
+                <span class="badge badge-super">&#11088; SUPER</span>
+            {% endif %}
         </h1>
         {% if user.bio %}<p class="profile-bio">{{ user.bio }}</p>{% endif %}
         {% if user.birthday_display %}
         <p class="profile-birthday">
-            &#127874; {{ user.birthday_display }}
-            {% if user.age is not none %}<span class="profile-age">(age {{ user.age }})</span>{% endif %}
+            {{ user.birthday_display }}
+            {% if user.age is not none %}
+                <span class="profile-age">(AGE {{ user.age }})</span>
+            {% endif %}
         </p>
         {% endif %}
     </div>
 </div>
 
+{# ---- Wish list ---- #}
 <div class="wishes-section">
     <div class="wishes-header">
-        <h2>Wish List</h2>
+        <h2>WISH LIST</h2>
         {% if current_user.is_authenticated and (current_user.id == user.id or current_user.is_superuser) %}
-            <a class="btn btn-primary" href="{{ url_for('wishes.add') }}">+ Add Wish</a>
+            <a class="btn btn-primary" href="{{ url_for('wishes.add') }}">+ ADD WISH</a>
         {% endif %}
     </div>
+
     {% if user.wish_items %}
     <div class="wish-grid">
         {% for item in user.wish_items %}
+        {% set res = item.reservation %}
         <div class="wish-card">
-            {% if item.picture %}
-                <img class="wish-pic" src="{{ url_for('static', filename=item.picture) }}" alt="{{ item.name }}">
-            {% else %}
-                <img class="wish-pic" src="{{ url_for('static', filename='placeholder/wish_placeholder.svg') }}" alt="No image">
-            {% endif %}
+
+            {# --- Picture + optional reserved overlay --- #}
+            <div class="wish-pic-wrap">
+                {% if item.picture %}
+                    <img class="wish-pic"
+                         src="{{ url_for('static', filename=item.picture) }}"
+                         alt="{{ item.name }}">
+                {% else %}
+                    <img class="wish-pic"
+                         src="{{ url_for('static', filename='placeholder/wish_placeholder.svg') }}"
+                         alt="No image">
+                {% endif %}
+
+                {% if res %}
+                <div class="reserved-overlay">
+                    <div class="eyes-wrap">
+                        <div class="eye">
+                            <div class="eyelid"></div>
+                            <div class="pupil"></div>
+                        </div>
+                        <div class="eye">
+                            <div class="eyelid"></div>
+                            <div class="pupil"></div>
+                        </div>
+                    </div>
+                    <span class="reserved-label">Someone's </span>
+                </div>
+                {% endif %}
+            </div>
+
+            {# --- Wish body --- #}
             <div class="wish-body">
                 <h3 class="wish-name">
                     {% if item.link %}
                         <a href="{{ item.link }}" target="_blank" rel="noopener">{{ item.name }}</a>
                     {% else %}{{ item.name }}{% endif %}
                 </h3>
-                {% if item.description %}<p class="wish-desc">{{ item.description }}</p>{% endif %}
-                {% if current_user.is_authenticated and (current_user.id == user.id or current_user.is_superuser) %}
+                {% if item.description %}
+                    <p class="wish-desc">{{ item.description }}</p>
+                {% endif %}
+
                 <div class="wish-actions">
-                    <a class="btn btn-sm" href="{{ url_for('wishes.edit', item_id=item.id) }}">Edit</a>
-                    <form method="POST" action="{{ url_for('wishes.delete', item_id=item.id) }}" style="display:inline"
-                          onsubmit="return confirm('Delete this wish?')">
-                        <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+                    {# Edit / Delete — owner or superuser only #}
+                    {% if current_user.is_authenticated and (current_user.id == user.id or current_user.is_superuser) %}
+                        <a class="btn btn-sm" href="{{ url_for('wishes.edit', item_id=item.id) }}">EDIT</a>
+                        <form method="POST"
+                              action="{{ url_for('wishes.delete', item_id=item.id) }}"
+                              style="display:inline"
+                              onsubmit="return confirm('Delete this wish?')">
+                            <button class="btn btn-sm btn-danger" type="submit">DELETE</button>
+                        </form>
+                    {% endif %}
+
+                    {# Reserve / Taken / Cancel — only for OTHER users' wishes #}
+                    {% if current_user.is_authenticated and current_user.id != user.id %}
+                        {% if res %}
+                            {% if res.reserved_by_id == current_user.id %}
+                                {# I reserved this #}
+                                <form method="POST"
+                                      action="{{ url_for('reservations.cancel', item_id=item.id) }}"
+                                      style="display:inline">
+                                    <button class="btn btn-sm btn-danger" type="submit">[ CANCEL ]</button>
+                                </form>
+                            {% elif current_user.is_superuser %}
+                                {# Superuser sees who + can force-cancel #}
+                                <span class="btn btn-sm btn-taken">[ TAKEN ]</span>
+                                <form method="POST"
+                                      action="{{ url_for('reservations.cancel', item_id=item.id) }}"
+                                      style="display:inline">
+                                    <button class="btn btn-sm btn-danger" type="submit">FORCE CANCEL</button>
+                                </form>
+                            {% else %}
+                                {# Someone else has it #}
+                                <span class="btn btn-sm btn-taken">[ TAKEN ]</span>
+                            {% endif %}
+                        {% else %}
+                            {# Not reserved — show reserve button #}
+                            <form method="POST"
+                                  action="{{ url_for('reservations.reserve', item_id=item.id) }}"
+                                  style="display:inline">
+                                <button class="btn btn-sm" type="submit">[ RESERVE ]</button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">NO WISHES YET.
+        {% if current_user.is_authenticated and current_user.id == user.id %}
+            <a href="{{ url_for('wishes.add') }}">ADD YOUR FIRST WISH!</a>
+        {% endif %}
+    </p>
+    {% endif %}
+</div>
+
+{# ---- MY RESERVATIONS — only visible to the profile owner ---- #}
+{% if current_user.is_authenticated and current_user.id == user.id %}
+<div class="my-reservations">
+    <div class="wishes-header">
+        <h2>MY RESERVATIONS</h2>
+    </div>
+
+    {% if current_user.reservations %}
+    <div class="wish-grid">
+        {% for res in current_user.reservations %}
+        {% set item = res.wish %}
+        <div class="wish-card">
+            <div class="wish-pic-wrap">
+                {% if item.picture %}
+                    <img class="wish-pic"
+                         src="{{ url_for('static', filename=item.picture) }}"
+                         alt="{{ item.name }}">
+                {% else %}
+                    <img class="wish-pic"
+                         src="{{ url_for('static', filename='placeholder/wish_placeholder.svg') }}"
+                         alt="No image">
+                {% endif %}
+            </div>
+            <div class="wish-body">
+                <h3 class="wish-name">
+                    {% if item.link %}
+                        <a href="{{ item.link }}" target="_blank" rel="noopener">{{ item.name }}</a>
+                    {% else %}{{ item.name }}{% endif %}
+                </h3>
+                <p class="reservation-from">
+                    <a href="{{ url_for('main.profile', username=item.owner.username) }}">{{ item.owner.username }}</a>
+                </p>
+                {% if item.description %}
+                    <p class="wish-desc">{{ item.description }}</p>
+                {% endif %}
+                <div class="wish-actions">
+                    <form method="POST"
+                          action="{{ url_for('reservations.cancel', item_id=item.id) }}"
+                          style="display:inline"
+                          onsubmit="return confirm('Cancel this reservation?')">
+                        <button class="btn btn-sm btn-danger" type="submit">[ CANCEL ]</button>
                     </form>
                 </div>
-                {% endif %}
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <p class="empty-state">No wishes yet.
-        {% if current_user.is_authenticated and current_user.id == user.id %}
-            <a href="{{ url_for('wishes.add') }}">Add your first wish!</a>
-        {% endif %}
-    </p>
+    <p class="empty-state">YOU HAVE NO ACTIVE RESERVATIONS.</p>
     {% endif %}
 </div>
+{% endif %}
+
 {% endblock %}

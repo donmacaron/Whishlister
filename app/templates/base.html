@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}WISHLISTER_3000{% endblock %}</title>
+    <title>{% block title %}WISHLISTER{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reservations.css') }}">
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
 </head>
 <body>
 <nav class="navbar">
-    <a class="nav-brand" href="{{ url_for('main.index') }}">[WISHLISTER_3000]</a>
+    <a class="nav-brand" href="{{ url_for('main.index') }}">[WISHLISTER]</a>
     <div class="nav-links">
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('main.profile', username=current_user.username) }}">[ PROFILE ]</a>
@@ -38,7 +39,7 @@
     {% block content %}{% endblock %}
 </main>
 <footer class="footer">
-    WISHLISTER &mdash; SHARE YOUR DESIRES
+    WISHLISTER &mdash; SHARE YOUR WISHES
 </footer>
 </body>
 </html>
